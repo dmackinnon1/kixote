@@ -101,7 +101,8 @@ class Cell {
 	}
 	
 	isEqual(other) {
-		return this.rowNum === other.rowNum && this.colNum === other.colNum;
+		var result =(this.rowNum === other.rowNum) && (this.colNum === other.colNum);
+		return result;
 	}
 };
 
@@ -126,6 +127,12 @@ class Board {
 			}
 		}
 	}
+	randomStart() {
+		var i = randomInt(this.rowNum);
+		var j = randomInt(this.colNum);
+		return this.cells[i][j];
+	}
+	
 	toString () {
 		var result = "";
 		for (var i = 0; i < this.rowNum; i ++){
@@ -161,7 +168,7 @@ class Path {
 	}
 	
 	contains(cell) {
-		for(var i; i < this.cells.length; i++){ 
+		for(var i = 0; i < this.cells.length; i++){ 
 			if (this.cells[i].isEqual(cell)){ 
 				return true;
 			}
@@ -218,6 +225,7 @@ class Path {
 			this.add(currentCell);
 		}	
 	}	
+	
 	decorateCells() {
 		for (var i = 0; i < this.cells.length; i ++) {
 			this.cells[i].decoration = (i+1);
@@ -228,7 +236,7 @@ class Path {
 		return this.cells[0];
 	}
 	tail() {
-		return this.cells[cells.length -1];
+		return this.cells[this.cells.length -1];
 	}
 	
 	toString() {
@@ -245,8 +253,30 @@ class Path {
 };
 
 /**
+* display 
+*/
+
+function htmlForBoard(board) {
+	var html = "<table border = 1 cellspacing = 1 cellpadding = 1>";
+	for (var i = 0; i < board.cells.length; i++){
+		var row = board.cells[i];
+		html += "<tr>";
+		for (var j = 0; j < row.length; j ++) {
+			var c = row[j];
+			html += "<td>" + c.decoration + "</td>";
+		}
+		html += "</tr>";
+	}
+	html += "</table>";
+	return html;	
+};
+
+
+/**
 * utilities
 */
 function randomInt(lessThan){
-	return Math.floor(Math.random()*lessThan);
+	var selection = Math.floor(Math.random()*(lessThan));
+	//console.log("choosing " + selection + " out of " + lessThan);
+	return selection;
 };

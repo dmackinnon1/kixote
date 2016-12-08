@@ -25,7 +25,7 @@ QUnit.test( "eightByeightNeighbor_test", function( assert ) {
 		assert.ok(board.cells[1][1].degree() === 4, "cell 11 in a 8x8 board has 4 neighbors");
 	});
 
-	QUnit.test( "warnsdorf_test", function( assert ) { 
+QUnit.test( "warnsdorf_test", function( assert ) { 
 		var board = new Board(5,6);
 		board.init();
 		console.log(board.cells[0][0].toString());
@@ -35,4 +35,60 @@ QUnit.test( "eightByeightNeighbor_test", function( assert ) {
 		console.log(path.toString());
 		assert.ok(true, path.toString());
 		assert.ok(true, path.size());
+		assert.ok(true, board.toString());
+		assert.ok(true, "is tour: " + path.isTour());
+		assert.ok(true, "is closed: " + path.isClosed());
 	});
+	
+QUnit.test( "warnsdorf_test2", function( assert ) { 
+		var board = new Board(5,6);
+		board.init();
+		console.log(board.cells[0][0].toString());
+		var path = new Path(board, board.cells[0][1]);
+		path.warnsdorffPath();
+		path.decorateCells();
+		console.log(path.toString());
+		assert.ok(true, path.toString());
+		assert.ok(true, path.size());
+		assert.ok(true, board.toString());
+		assert.ok(true, "is tour: " + path.isTour());
+		assert.ok(true, "is closed: " + path.isClosed());
+	});
+	
+QUnit.test( "path_contains_test", function( assert ) { 
+		var board = new Board(5,6);
+		board.init();
+		console.log(board.cells[0][0].toString());
+		var path = new Path(board, board.cells[0][1]);
+		path.add(board.cells[0][0]);
+		assert.ok(path.contains(board.cells[0][0]));
+	});
+	
+QUnit.test( "warnsdorf_test3", function( assert ) { 
+		var board = new Board(5,6);
+		board.init();
+		console.log(board.cells[0][0].toString());
+		var path = new Path(board, board.cells[1][1]);
+		path.warnsdorffPath();
+		path.decorateCells();
+		console.log(path.toString());
+		assert.ok(true, path.toString());
+		assert.ok(true, path.size());
+		assert.ok(true, board.toString());
+		assert.ok(true, "is tour: " + path.isTour());
+		assert.ok(true, "is closed: " + path.isClosed());
+	});
+	
+QUnit.test( "board_equals_validation", function( assert ) { 
+		var board = new Board(6,6);
+		board.init();
+		for (var i = 0; i < 5; i ++){
+			for (j = 0; j < 6; j ++) {
+				assert.ok(board.cells[i][j].isEqual(board.cells[i][j]), "verifying self equaly " + i + "" + j);
+				if (i !== j) {
+					assert.notOk(board.cells[i][j].isEqual(board.cells[j][i]), "");
+				}
+			}
+		}
+});	
+	

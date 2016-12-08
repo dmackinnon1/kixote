@@ -15,10 +15,37 @@ table, th, td {
     border: 1px solid black;
     border-collapse: collapse; 
 }
-
 </style>
 </head>
 <script src="js/kixote.js"></script>
+<script>
+
+function loadBoard() {
+	var board = new Board(4,4);
+	board.init();
+	var path = new Path(board, board.randomStart());
+	path.warnsdorffPath();
+	path.decorateCells();
+	console.log(path.toString());
+	console.log(" is tour: " + path.isTour());
+	console.log(" is closed: " + path.isClosed());
+	return htmlForBoard(board);
+};
+
+$(document).ready(function(){
+	console.log("initialization called");
+    $("#boardDisplay").html(loadBoard());
+});
+
+$(document).ready(function(){
+    $("#refresh").on("click", function(event){
+		console.log("refresh button clicked");
+		$("#boardDisplay").html(loadBoard());
+	});	
+});
+
+</script>
+
 <body>
 
 <div class="container-fluid">
@@ -29,7 +56,10 @@ table, th, td {
 <div class="page-header">
 	<h1>Kixote, or Knight's Tour Puzzles</h1>
 </div> 	
+<button id="refresh" class="btn btn-default">refresh</button>
 
+<div id="boardDisplay">
+</div>
 
 </div>
 <div class='col-sm-1'>
