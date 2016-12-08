@@ -10,7 +10,7 @@ class Cell {
 		this.rowNum = rowNum;
 		this.colNum = colNum;
 		this.board = board;
-		//console.log("created cell " + rowNum + " " + colNum );
+		this.decoration = "*";
 	}
 	
 	nne(){
@@ -84,12 +84,24 @@ class Cell {
 		return list;
 	}
 	
+	isNeighbor(cell) {
+		var nbrs = this.neighbors();
+		for (var i = 0; i < nbrs.length; i ++) {
+			if (cell.isEqual(nbrs[i])) return true;
+		}
+		return false;
+	}
+	
 	degree(){
 		return this.neighbors().length;
 	}
 	
 	toString() {
-		return "Cell [" + this.rowNum + "][" + this.colNum +"]: " + this.degree();
+		return "Cell [" + this.rowNum + "][" + this.colNum +"]: " + this.decoration;
+	}
+	
+	isEqual(other) {
+		return this.rowNum === other.rowNum && this.colNum === other.colNum;
 	}
 };
 
@@ -127,25 +139,10 @@ class Board {
 	getColumnSize(){
 		return this.colNum;
 	}
+	getSize() {
+		return this.colNum * this.rowNum;
+	}
 };
-
-
-var board = new Board(4,4);
-board.init();
-console.log("Hello World");
-console.log(" 4x4" + board.toString());
-
-board = new Board(1,1);
-board.init();
-console.log(" 1x1" + board.toString());
-
-board = new Board(3,3);
-board.init();
-console.log(" 3x3" + board.toString());
-
-board = new Board(8,8);
-board.init();
-console.log(" 8x8" + board.toString());
 
 
 /*
@@ -153,4 +150,103 @@ console.log(" 8x8" + board.toString());
 */
 class Path {
 	
+	constructor(board, start) {
+		this.board = board;
+		this.start = start;
+		this.cells = [];
+	}
+	
+	size(){
+		return this.cells.length;
+	}
+	
+	contains(cell) {
+		for(var i; i < this.cells.length; i++){ 
+			if (this.cells[i].isEqual(cell)){ 
+				return true;
+			}
+		}
+		return false;
+	}
+	
+	add(cell) {
+		this.cells.push(cell);
+	}
+	
+	freeDegree(cell){
+		var freeDegree  = 0;
+		var nlist = cell.neighbors();
+		for(var i; i < nlist.length; i++){
+			var c = nlist[i]; 
+			if(!this.contains(c)) freeDegree ++;	
+		}
+		return freeDegree;
+	}
+	
+	warnsdorffPath(){
+		var currentCell = this.start;
+		this.add(currentCell);
+		var boardSize = this.board.getSize();
+		var options = [];
+		var leasts = [];
+		var currentValue = null;
+		while(this.size() < boardSize){
+			var leastValue = 8; // magic number: most number of knight moves from a square on a 2d board is 8
+			options = currentCell.neighbors();
+			leasts = [];
+			//first loop to find the least
+			for(var i = 0; i < options.length; i++){
+				var c = options[i];
+				if(this.contains(c)) continue;
+				currentValue = this.freeDegree(c);
+				if(currentValue <= leastValue){
+					leastValue = currentValue; 
+				}
+			}
+			//second loop to gather all with least value
+			for(var i = 0; i < options.length; i++){
+				var c = options[i];
+				if(this.contains(c)) continue;
+				currentValue = this.freeDegree(c);
+				if(currentValue == leastValue){
+					leasts.push(c);
+				}
+			}
+			if (leasts.length == 0) break;
+			var toPick = randomInt(leasts.length);
+			currentCell = leasts[toPick];
+			this.add(currentCell);
+		}	
+	}	
+	decorateCells() {
+		for (var i = 0; i < this.cells.length; i ++) {
+			this.cells[i].decoration = (i+1);
+		}		
+	}
+	
+	head() {
+		return this.cells[0];
+	}
+	tail() {
+		return this.cells[cells.length -1];
+	}
+	
+	toString() {
+		return "Path: " + this.cells;
+	}
+	
+	isTour(){
+		return this.cells.length === this.board.getSize();
+	}
+	
+	isClosed(){
+		return this.head().isNeighbor(this.tail());		
+	}
+};
+
+/**
+* utilities
+*/
+function randomInt(lessThan){
+	return Math.floor(Math.random()*lessThan);
 };
