@@ -183,7 +183,7 @@ class Path {
 	freeDegree(cell){
 		var freeDegree  = 0;
 		var nlist = cell.neighbors();
-		for(var i; i < nlist.length; i++){
+		for(var i = 0; i < nlist.length; i++){
 			var c = nlist[i]; 
 			if(!this.contains(c)) freeDegree ++;	
 		}
