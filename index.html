@@ -24,7 +24,7 @@ function loadBoard() {
 	var board = new Board(5,6);
 	board.init();
 	var path = new Path(board, board.randomStart());
-	path.warnsdorffPath();
+	path.buildPath();
 	path.decorateCells();
 	console.log(path.toString());
 	console.log(" is tour: " + path.isTour());

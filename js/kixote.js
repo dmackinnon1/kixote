@@ -11,6 +11,7 @@ class Cell {
 		this.colNum = colNum;
 		this.board = board;
 		this.decoration = "*";
+		this.exclusions = [];
 	}
 	
 	nne(){
@@ -92,6 +93,13 @@ class Cell {
 		return false;
 	}
 	
+	excludes(cell) {
+		for (var i = 0; i < this.exclusions.length; i ++) {
+			if (cell.isEqual(exclusions[i])) return true;
+		}
+		return false;
+	}
+	
 	degree(){
 		return this.neighbors().length;
 	}
@@ -160,7 +168,8 @@ class Path {
 	constructor(board, start) {
 		this.board = board;
 		this.start = start;
-		this.cells = [];
+		this.cells = [start];
+		this.currentCell = start;
 	}
 	
 	size(){
@@ -190,21 +199,20 @@ class Path {
 		return freeDegree;
 	}
 	
-	warnsdorffPath(){
-		var currentCell = this.start;
-		this.add(currentCell);
+	warnsdorffPath(){		
 		var boardSize = this.board.getSize();
 		var options = [];
 		var leasts = [];
 		var currentValue = null;
 		while(this.size() < boardSize){
 			var leastValue = 8; // magic number: most number of knight moves from a square on a 2d board is 8
-			options = currentCell.neighbors();
+			options = this.currentCell.neighbors();
 			leasts = [];
 			//first loop to find the least
 			for(var i = 0; i < options.length; i++){
 				var c = options[i];
 				if(this.contains(c)) continue;
+				if (this.currentCell.excludes(c)) continue;
 				currentValue = this.freeDegree(c);
 				if(currentValue <= leastValue){
 					leastValue = currentValue; 
@@ -214,6 +222,7 @@ class Path {
 			for(var i = 0; i < options.length; i++){
 				var c = options[i];
 				if(this.contains(c)) continue;
+				if (this.currentCell.excludes(c)) continue;
 				currentValue = this.freeDegree(c);
 				if(currentValue == leastValue){
 					leasts.push(c);
@@ -221,10 +230,34 @@ class Path {
 			}
 			if (leasts.length == 0) break;
 			var toPick = randomInt(leasts.length);
-			currentCell = leasts[toPick];
-			this.add(currentCell);
+			this.currentCell = leasts[toPick];
+			this.add(this.currentCell);
 		}	
 	}	
+	
+	backtrack(){
+		var oldTail = this.cells.pop();
+		this.tail().exclusions.push(oldTail);
+		oldTail.exclusions = [];
+	}
+	
+	buildPath() {
+		var backtrackCount = 0;
+		while(!this.isTour() && backtrackCount < 10){ //magic
+			this.warnsdorffPath();
+			if(!this.isTour()) {
+				this.backtrack();
+				backtrackCount ++;
+				console.log("backtracking... length: " + this.cells.length);
+				console.log("backtrackCount: " + backtrackCount);
+			}
+			if(this.cells.length == 0){
+				break;
+			}
+		}
+		console.log("is tour: " + this.isTour());
+	}
+	
 	
 	decorateCells() {
 		for (var i = 0; i < this.cells.length; i ++) {
@@ -235,6 +268,7 @@ class Path {
 	head() {
 		return this.cells[0];
 	}
+	
 	tail() {
 		return this.cells[this.cells.length -1];
 	}
