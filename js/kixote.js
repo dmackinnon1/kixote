@@ -257,13 +257,14 @@ class Path {
 */
 
 function htmlForBoard(board) {
-	var html = "<table border = 1 cellspacing = 1 cellpadding = 1>";
+	var html = "<table border = 1 cellspacing = 1 cellpadding = 1 align='center'>";
 	for (var i = 0; i < board.cells.length; i++){
 		var row = board.cells[i];
 		html += "<tr>";
 		for (var j = 0; j < row.length; j ++) {
 			var c = row[j];
-			html += "<td>" + c.decoration + "</td>";
+			html += "<td><div id='cell" + i +""+ j +"' class='gameCell' onclick='cellClick(event)'>";  			
+			html += c.decoration + "</div></td>";
 		}
 		html += "</tr>";
 	}
@@ -271,6 +272,10 @@ function htmlForBoard(board) {
 	return html;	
 };
 
+function cellClick(event) {
+	console.log("cell was clicked!");
+	console.log(event.target);
+}
 
 /**
 * utilities

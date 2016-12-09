@@ -21,7 +21,7 @@ table, th, td {
 <script>
 
 function loadBoard() {
-	var board = new Board(5,6);
+	var board = new Board(8,8);
 	board.init();
 	var path = new Path(board, board.randomStart());
 	path.warnsdorffPath();
@@ -56,10 +56,13 @@ $(document).ready(function(){
 <div class="page-header">
 	<h1>Kixote, or Knight's Tour Puzzles</h1>
 </div> 	
-<button id="refresh" class="btn btn-default">refresh</button>
+<button id="refresh" class="btn btn-default">New Puzzle</button>
 
-<div id="boardDisplay">
+<hr>
+
+<h2><div id="boardDisplay" style="text-align=center">
 </div>
+</h2>
 
 </div>
 <div class='col-sm-1'>
