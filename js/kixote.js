@@ -190,6 +190,15 @@ class Path {
 		return freeDegree;
 	}
 	
+	initPath() {
+		var tries = 0;
+		while (!this.isTour() && tries < 10) {
+			this.warnsdorffPath();
+			tries ++;
+		}
+		return this.isTour();
+	}
+
 	warnsdorffPath(){
 		var currentCell = this.start;
 		this.add(currentCell);
@@ -263,7 +272,8 @@ function htmlForBoard(board) {
 		html += "<tr>";
 		for (var j = 0; j < row.length; j ++) {
 			var c = row[j];
-			html += "<td><div id='cell" + i +""+ j +"' class='gameCell' onclick='cellClick(event)'>";  			
+			html += "<td><div id='cell" + i +""+ j +"' class='gameCell' onclick='cellClick(event)'";
+			html += " data-row='"+ i + "' data-col='" + j + "'>";
 			html += c.decoration + "</div></td>";
 		}
 		html += "</tr>";
@@ -274,8 +284,12 @@ function htmlForBoard(board) {
 
 function cellClick(event) {
 	console.log("cell was clicked!");
-	console.log(event.target);
-}
+	var i = parseInt(event.target.getAttribute("data-row"));
+	var j = parseInt(event.target.getAttribute("data-col"));
+	console.log("i " + i);
+	console.log("j " + j);
+	kixote.clicked(i,j, event.target);
+};
 
 /**
 * utilities
@@ -285,3 +299,61 @@ function randomInt(lessThan){
 	//console.log("choosing " + selection + " out of " + lessThan);
 	return selection;
 };
+
+class Game {
+	
+	constructor(board) {
+		this.board = board;
+		board.init();
+		this.path = new Path(this.board, this.board.randomStart());
+		this.solution = [];		
+	}
+	
+	getPath() {
+		return this.path;
+	}
+	getBoard() {
+		return this.board;
+	}
+	
+	init () {
+		this.path.initPath();	
+		while (!this.path.isTour()) {
+			this.path.initPath();
+			if (path.isTour()) break;
+			this.path = new Path(board, board.randomStart());
+		}		
+		this.path.decorateCells();
+	}
+
+	startGame() {
+		this.solution.push(this.path.head());
+	}
+	
+	getCell (i, j) {
+		return this.board.cells[i][j];
+	}
+	
+	clicked(i,j, target) {
+		var cell = this.getCell(i,j);
+		this.selectCell(cell, target);
+	}
+	
+	selectCell(cell, target) {
+		var currentLevel = this.solution.length;
+		var targetCell = this.path.cells[currentLevel];
+		console.log("aiming for cell: " + targetCell);
+		if (targetCell.isEqual(cell)){
+			console.log("correct cell chosen");
+			this.solution.push(cell);
+		} else {
+			console.log("wrong cell chosen");
+			target.setAttribute("style", "background-color:red");
+			console.log(target);
+		}
+	}
+};
+
+var gameBoard = new Board(8,8);
+gameBoard.init();
+var kixote = new Game(gameBoard);

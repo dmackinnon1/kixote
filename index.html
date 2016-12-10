@@ -21,15 +21,11 @@ table, th, td {
 <script>
 
 function loadBoard() {
-	var board = new Board(8,8);
-	board.init();
-	var path = new Path(board, board.randomStart());
-	path.warnsdorffPath();
-	path.decorateCells();
-	console.log(path.toString());
-	console.log(" is tour: " + path.isTour());
-	console.log(" is closed: " + path.isClosed());
-	return htmlForBoard(board);
+	kixote = new Game(gameBoard);
+	kixote.init();
+	kixote.startGame();
+	console.log(kixote.getPath().toString());
+	return htmlForBoard(kixote.getBoard());
 };
 
 $(document).ready(function(){
