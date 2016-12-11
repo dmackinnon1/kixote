@@ -23,7 +23,6 @@ table, th, td {
 function loadBoard() {
 	kixote = new Game(gameBoard);
 	kixote.init();
-	kixote.startGame();
 	console.log(kixote.getPath().toString());
 	return htmlForBoard(kixote.getBoard());
 };
@@ -31,12 +30,14 @@ function loadBoard() {
 $(document).ready(function(){
 	console.log("initialization called");
     $("#boardDisplay").html(loadBoard());
+    kixote.startGame();
 });
 
 $(document).ready(function(){
     $("#refresh").on("click", function(event){
 		console.log("refresh button clicked");
 		$("#boardDisplay").html(loadBoard());
+		kixote.startGame();
 	});	
 });
 
@@ -52,17 +53,41 @@ $(document).ready(function(){
 <div class="page-header">
 	<h1>Kixote <small>Knight's Tour Puzzles</small></h1>
 </div> 	
+
+<button type='button' class='btn btn-info' data-toggle='collapse' data-target='#full'>
+About </button>
+<div id='full' class='collapse '>
+<br><hr>
+<div class="media">
+  <a class="media-left media-middle" href="#">
+    <img class="media-object" src="imgs/knight_moves.jpg" alt="Knight Moves" width="150" height="150">
+  </a>
+  <div class="media-body">
+    <h4 class="media-heading">Kixote Puzzles</h4>
+When a knight has traveled around a chessboard touching every square exactly once, it has complted a "knight's tour."
+A knight's tour has been completed on the 8x8 board below, and the numbers show the order in which the tour was completed.
+Some of the numbers have been hidden. Your task is to reveal the hidden numbers in the correct order to complete the tour.
+ </div>
+</div>
+<br>
+<hr><br>
+</div>
+
 <button id="refresh" class="btn btn-default">New Puzzle</button>
-
+<div id="finish" style="text-align=center"></div>
 <hr>
-
 <h2><div id="boardDisplay" style="text-align=center">
 </div>
 </h2>
+<hr>
+<div id="missteps" style="text-align=center"></div>
+<hr>
+
 
 </div>
 <div class='col-sm-1'>
 </div>
+
 
 </body>
 

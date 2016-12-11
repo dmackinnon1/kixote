@@ -24,7 +24,9 @@ class Cell {
 	
 	getDisplay() {
 		if(this.hide) {
-			return "**";
+			var glyph = "<span class='glyphicon glyphicon-question-sign'";
+			glyph += " data-row='"+ this.rowNum + "' data-col='" + this.colNum + "'>";
+			return glyph;
 		} else {
 			return this.decoration;
 		}
@@ -312,7 +314,7 @@ function cellClick(event) {
 	var j = parseInt(event.target.getAttribute("data-col"));
 	console.log("i " + i);
 	console.log("j " + j);
-	kixote.clicked(i,j, event.target);
+	kixote.clicked(i,j, event.target); //event.target
 };
 
 /**
@@ -332,6 +334,7 @@ class Game {
 		this.path = new Path(this.board, this.board.randomStart());
 		this.solution = [];
 		this.wrong = [];
+		this.misstep = 0;
 	}
 	
 	getPath() {
@@ -345,6 +348,7 @@ class Game {
 		var difficulty = 3; //2 
 		this.path.initPath();	
 		while (!this.path.isTour()) {
+			console.log("retrying tour generation...");
 			this.path.initPath();
 			if (path.isTour()) break;
 			this.path = new Path(board, board.randomStart());
@@ -354,6 +358,11 @@ class Game {
 
 	startGame() {
 		this.solution.push(this.path.head());
+		var last = this.getDiv(this.solution[0].rowNum, this.solution[0].colNum);
+		last.css("background"," #999966");	
+		$("#finish").html("");
+		$("#missteps").html("<h3 align='center'>missteps: 0 </h3>");
+		
 	}
 	
 	getCell (i, j) {
@@ -372,27 +381,95 @@ class Game {
 	selectCell(cell, target) {
 		var currentLevel = this.solution.length;
 		var targetCell = this.path.cells[currentLevel];
+		var i = parseInt(target.getAttribute("data-row"));
+		var j = parseInt(target.getAttribute("data-col"));
+		
+		var parentTarget = target;
+		if (target.localName === 'span') {
+			parentTarget = target.parentNode;
+		}	
 		console.log("aiming for cell: " + targetCell);
 		if (targetCell.isEqual(cell)){
 			console.log("correct cell chosen");
 			this.solution.push(cell);
 			cell.showIt();
-			target.innerHTML = cell.getDisplay();
+			parentTarget.innerHTML = cell.getDisplay();
 			this.resetWrongs();
+			this.updatePath();
+			this.colourSolution();
+			if (this.getIsDone()){
+				$("#finish").html("<h2 align='center'>Finished!</h2>");
+			}
 		} else {
 			console.log("wrong cell chosen");
-			target.setAttribute("style", "background-color:red");
-			console.log(target);
-			this.wrong.push(cell);
+			this.misstep ++;
+			if (cell.hide && !this.isInWrong(cell)) {
+				var glyph = "<span class='glyphicon glyphicon-remove-circle' ";
+				glyph += " data-row='"+ i + "' data-col='" + j + "'>";
+				parentTarget.innerHTML= glyph;
+				this.wrong.push(parentTarget);
+			}
+			$("#missteps").html("<h3 align='center'>missteps: " + this.misstep + "</h3>");
 		}
 	}
 	
-	resetWrongs() {
-		for (var i = 0; i < this.wrong.length; i++){
-			var div = this.getDiv(this.wrong[i].rowNum, this.wrong[i].colNum);
-			console.log(div);
-			div.css("background","white");
+	getMissteps(){
+		return this.missteps;	
+	}
+	
+	getIsDone() {
+		return this.solution.length == this.path.cells.length;
+	}
+	
+	isInWrong(cell) {
+		var ci = cell.rowNum;
+		var cj = cell.colNum;
+		for (var k = 0; k < this.wrong.length; k++) {
+			var i = parseInt(this.wrong[k].getAttribute("data-row"));
+			var j = parseInt(this.wrong[k].getAttribute("data-col"));
+			if (ci === i && cj === j) return true;
+		}		
+		return false;
+	}
+
+	updatePath() {
+		var sIndex = this.solution.length;
+		for (var i = sIndex; i < this.path.cells.length; i++) {
+				var nextCell = this.path.cells[i];
+				if (!nextCell.hide) {
+					this.solution.push(nextCell);
+				} else {
+					break;
+				}
 		}
+	}
+	colourSolution() {
+			for (var i = 0; i < this.solution.length; i ++){
+				var div = this.getDiv(this.solution[i].rowNum, this.solution[i].colNum);
+				console.log(div);
+				div.css("background","#ebebe0");
+			}
+			var lastIndex = this.solution.length -1;
+			if (lastIndex >= 0) {
+				var last = this.getDiv(this.solution[lastIndex].rowNum, this.solution[lastIndex].colNum);
+				last.css("background"," #999966");
+			}
+	}
+	
+	resetWrongs() {
+		for (var k = 0; k < this.wrong.length; k++){
+			//var div = this.getDiv(this.wrong[i].rowNum, this.wrong[i].colNum);
+			var div = this.wrong[k];
+			console.log(div);
+			//console.log(div.firstChild);
+			//div.css("background","white");
+			var i = parseInt(div.getAttribute("data-row"));
+			var j = parseInt(div.getAttribute("data-col"));
+			var glyph = "<span class='glyphicon glyphicon-question-sign' ";
+			glyph += " data-row='"+ i + "' data-col='" + j + "'>";
+			div.innerHTML = glyph;
+		}
+		this.wrong = [];
 	
 	}
 };
