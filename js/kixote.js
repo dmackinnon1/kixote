@@ -11,6 +11,23 @@ class Cell {
 		this.colNum = colNum;
 		this.board = board;
 		this.decoration = "*";
+		this.hide = false;
+	}
+	
+	hideIt() {
+		this.hide = true;
+	}
+	
+	showIt(){
+		this.hide = false;
+	}
+	
+	getDisplay() {
+		if(this.hide) {
+			return "**";
+		} else {
+			return this.decoration;
+		}
 	}
 	
 	nne(){
@@ -235,10 +252,17 @@ class Path {
 		}	
 	}	
 	
-	decorateCells() {
+	decorateCells(hideFrequency) {
 		for (var i = 0; i < this.cells.length; i ++) {
 			this.cells[i].decoration = (i+1);
-		}		
+		}
+		if (hideFrequency > 0) {
+			for (var i = 0; i < this.cells.length; i ++) {
+				if (i % hideFrequency == 1) {
+					this.cells[i].hideIt();
+				}
+			}
+		}
 	}
 	
 	head() {
@@ -274,7 +298,7 @@ function htmlForBoard(board) {
 			var c = row[j];
 			html += "<td><div id='cell" + i +""+ j +"' class='gameCell' onclick='cellClick(event)'";
 			html += " data-row='"+ i + "' data-col='" + j + "'>";
-			html += c.decoration + "</div></td>";
+			html += c.getDisplay() + "</div></td>";
 		}
 		html += "</tr>";
 	}
@@ -306,7 +330,8 @@ class Game {
 		this.board = board;
 		board.init();
 		this.path = new Path(this.board, this.board.randomStart());
-		this.solution = [];		
+		this.solution = [];
+		this.wrong = [];
 	}
 	
 	getPath() {
@@ -317,13 +342,14 @@ class Game {
 	}
 	
 	init () {
+		var difficulty = 3; //2 
 		this.path.initPath();	
 		while (!this.path.isTour()) {
 			this.path.initPath();
 			if (path.isTour()) break;
 			this.path = new Path(board, board.randomStart());
 		}		
-		this.path.decorateCells();
+		this.path.decorateCells(difficulty);
 	}
 
 	startGame() {
@@ -346,6 +372,8 @@ class Game {
 		if (targetCell.isEqual(cell)){
 			console.log("correct cell chosen");
 			this.solution.push(cell);
+			cell.showIt();
+			target.innerHTML = cell.getDisplay();
 		} else {
 			console.log("wrong cell chosen");
 			target.setAttribute("style", "background-color:red");
