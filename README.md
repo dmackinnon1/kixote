@@ -1,2 +1,2 @@
 # kixote
-knight's tour puzzle generator
+A knight's tour puzzle generator - another Javascript learning project.
