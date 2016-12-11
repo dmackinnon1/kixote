@@ -360,6 +360,10 @@ class Game {
 		return this.board.cells[i][j];
 	}
 	
+	getDiv(i,j) {
+		return $("#cell" + i +""+j);
+	}
+	
 	clicked(i,j, target) {
 		var cell = this.getCell(i,j);
 		this.selectCell(cell, target);
@@ -374,11 +378,22 @@ class Game {
 			this.solution.push(cell);
 			cell.showIt();
 			target.innerHTML = cell.getDisplay();
+			this.resetWrongs();
 		} else {
 			console.log("wrong cell chosen");
 			target.setAttribute("style", "background-color:red");
 			console.log(target);
+			this.wrong.push(cell);
 		}
+	}
+	
+	resetWrongs() {
+		for (var i = 0; i < this.wrong.length; i++){
+			var div = this.getDiv(this.wrong[i].rowNum, this.wrong[i].colNum);
+			console.log(div);
+			div.css("background","white");
+		}
+	
 	}
 };
 
