@@ -538,19 +538,22 @@ class Game {
 	//maybe make the map size configurable
 	// also, make it additive, instead of redrawing each time
 	svgMap() {
-		var svg = "<svg align='center' width='240' height='240'>";
+		var svg = new Bldr("svg");
+		svg.att("align", "center").att("width","240").att("height","240");
 		//first the board
 		for (var i = 0; i < 8; i++) {
 			for (var j = 0; j < 8; j ++) {
 				var x = i*30;
 				var y = j*30;
 				if (i%2==0 && j%2==0){
-					svg += "<rect x='" +x + "' y='" + y +"'";
-					svg += "width='30' height='30' fill='#ccccb3' />";
-				}
+					var rect = new Bldr("rect").att("x", x).att("y",y);
+					rect.att("width", "30").att("height","30").att("fill", "#ccccb3"); 			
+					svg.elem(rect);
+					}
 				if (i%2!=0 && j%2!=0){
-					svg += "<rect x='" +x + "' y='" + y +"'";
-					svg += "width='30' height='30' fill='#ccccb3' />";
+					var rect = new Bldr("rect").att("x", x).att("y",y);
+					rect.att("width", "30").att("height","30").att("fill", "#ccccb3"); 			
+					svg.elem(rect);
 				}
 			}
 		}
@@ -563,8 +566,9 @@ class Game {
 			if (prev !== null) {
 				var px = (15 + prev.colNum*30);
 				var py = (15 + prev.rowNum*30);
-				svg += " <line x1='" + px +"' y1='"+py + "' x2='" + x + "' y2='" + y +"'"; 
-				svg += " stroke='black' stroke-width='2'/>";
+				var line = new Bldr("line").att("x1", px).att("y1", py).att("x2", x).att("y2",y);
+				line.att("stroke", "black").att("stroke-width", 2);
+				svg.elem(line);
 			}
 			prev = cell;
 		}
@@ -573,18 +577,20 @@ class Game {
 			var cell = this.solution[i];
 			var x = (15 + cell.colNum*30);
 			var y = (15 + cell.rowNum*30);
-			svg +=  "<circle cx='" + x + "' cy='" + y +"'";
-			svg += " r='3' stroke='black' stroke-width='1' fill='grey' />";
+			var circle = new Bldr("circle").att("cx",x).att("cy", y);
+			circle.att("r",3).att("stroke", "black").att("stroke-width",1).att("fill","grey");
+			svg.elem(circle);
 			if (i === 0){
-				svg +=  "<circle cx='" + x + "' cy='" + y +"'";
-				svg += " r='6' stroke='black' stroke-width='1' fill='none' />";			
+				var c0 = new Bldr("circle").att("cx",x).att("cy", y);
+				c0.att("r",6).att("stroke", "black").att("stroke-width",1).att("fill","none");
+				svg.elem(c0);	
 			} else if (i === this.solution.length - 1) {
-				svg +=  "<circle cx='" + x + "' cy='" + y +"'";
-				svg += " r='5' stroke='black' stroke-width='1' fill='black' />";					
+				var cn = new Bldr("circle").att("cx",x).att("cy", y);
+				cn.att("r",5).att("stroke", "black").att("stroke-width",1).att("fill","black");
+				svg.elem(cn);
 			}			
 		}
-		svg += "</svg>";
-		return svg;
+		return svg.build();
 	}
 };
 //the game instance
