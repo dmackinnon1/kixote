@@ -371,19 +371,23 @@ function cellClick(event) {
 	game.clicked(i,j, event.target); //event.target
 };
 
+
+//object containing displayable elements
+var gameDisplay = {};
+gameDisplay.statusMessage = "";
+gameDisplay.map = "";
+gameDisplay.missteps = "";
+
 /**
-* utilities
+* Some events are fired when these elements are updated
+* refreshStatus - called when status is updated
+* refreshMap - called when map is updated
+* refreshSteps - called when misstep count is updated
+* 
+* These use the 'evnts' object to invoke any registered callbacks
 */
-function randomInt(lessThan){
-	var selection = Math.floor(Math.random()*(lessThan));
-	return selection;
-};
 
 
-/*
-* The game curretly plays, but is also aware of display 
-* elements. Should refactor and move display elements out.
-*/
 class Game {
 	
 	constructor(board, isKixote) {
@@ -415,8 +419,7 @@ class Game {
 	init () {
 		var difficulty = 3; //2 
 		this.path.initPath();	
-		while (!this.path.isTour()) {
-			console.log("retrying tour generation...");
+		while (!this.path.isTour()) {c
 			this.path.initPath();
 			if (path.isTour()) break;
 			this.path = new Path(board, board.randomStart());
@@ -429,9 +432,12 @@ class Game {
 		this.solution.push(this.path.head());
 		var last = this.getDiv(this.solution[0].rowNum, this.solution[0].colNum);
 		last.css("background"," #999966");	
-		$("#finish").html("");
-		$("#missteps").html("<h3 align='center'>missteps: 0 </h3>");
-		$('#mapDisplay').html(this.svgMap());		
+		gameDisplay.statusMessage = "";
+		gameDisplay.missteps = new Bldr("h3").att("align","center").text("missteps: 0").build();
+		gameDisplay.map = this.svgMap();
+		evnts.fireEvent("refreshStatus");
+		evnts.fireEvent("refreshSteps");
+		evnts.fireEvent("refreshMap");
 	}
 	
 	getCell(i, j) {
@@ -458,22 +464,23 @@ class Game {
 			parentTarget = target.parentNode;
 		}	
 		if (targetCell.isEqual(cell)){
-			console.log("correct cell chosen");
 			this.solution.push(cell);
 			cell.showIt();
 			parentTarget.innerHTML = cell.getDisplay();
 			this.resetWrongs();
 			this.updatePath();
 			this.colourSolution();
-			$('#mapDisplay').html(this.svgMap());
+			gameDisplay.map = this.svgMap();
 			if (this.getIsDone()){
-				$("#finish").html("<h2 align='center'>Finished!</h2>");
+				gameDisplay.statusMessage = new Bldr("h2").att("align","center").text("Finished!").build();
+				evnts.fireEvent("refreshStatus");
 			}
-
+			evnts.fireEvent("refreshMap");
 		} else {
 			if (cell.hide && !this.isInWrong(cell)) {
 				this.misstep ++;
-				$("#missteps").html("<h3 align='center'>missteps: " + this.misstep + "</h3>");
+				gameDisplay.missteps = new Bldr("h3").att("align","center").text("missteps: " + this.misstep).build();
+				evnts.fireEvent("refreshSteps");
 				var glyph = "<span class='glyphicon glyphicon-remove-circle' ";
 				glyph += " data-row='"+ i + "' data-col='" + j + "'>";
 				parentTarget.innerHTML= glyph;
@@ -597,3 +604,11 @@ class Game {
 var gameBoard = new Board(8,8);
 gameBoard.init();
 var game = null;
+
+/**
+* utilities
+*/
+function randomInt(lessThan){
+	var selection = Math.floor(Math.random()*(lessThan));
+	return selection;
+};

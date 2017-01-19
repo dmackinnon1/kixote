@@ -22,6 +22,11 @@ class Bldr {
 		return this;
 	}
 
+	text(text) {
+		this.elements.push (new RawHtml(text));
+		return this;
+	}
+
 	build() {
 		var s = "<" + this.name;
 		for(var i = 0; i< this.attributes.length; i++) {
@@ -46,4 +51,14 @@ class Attribute {
 		var s = "" + this.name + "='" + this.value + "'";
 		return s;
 	}
-}
+};
+
+class RawHtml {
+	constructor(raw) {
+		this.raw = raw;
+	}
+	build() {
+		return this.raw;
+	}
+};
+
