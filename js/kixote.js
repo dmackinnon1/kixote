@@ -387,7 +387,7 @@ gameDisplay.missteps = "";
 * These use the 'evnts' object to invoke any registered callbacks
 */
 
-
+//this is the Kixote and Hidato game.
 class Game {
 	
 	constructor(board, isKixote) {
@@ -600,6 +600,289 @@ class Game {
 		return svg.build();
 	}
 };
+//Tourist game below
+class Tourist {
+	
+	constructor(board, isKixote) {
+		this.board = board;
+		board.init();
+		this.path = new Path(this.board, this.board.randomStart());
+		//this.solution = [];
+		//this.wrong = [];
+		//this.misstep = 0;
+		this.isKixote = isKixote;
+	}
+
+	toString(){
+		return "" + this.path + ": " + this.path.isTour(); 
+	}
+	
+	isIncomplete(){
+		return !this.path.isTour();
+	}
+
+	getPath() {
+		return this.path;
+	}
+
+	getBoard() {
+		return this.board;
+	}
+	
+	init () {
+		this.path.add(this.path.start);
+		this.decorateCells();
+	}
+
+	decorateCells() {
+		var current = this.path.tail();
+		
+		for (var i = 0; i < this.board.rowNum; i++) {
+			for (var j = 0; j < this.board.colNum; j++) {
+				var cell = this.board.cells[i][j];
+				cell.decoration = this.path.freeDegree(cell);				
+			}
+		}		
+	}
+
+	knightGlyph(i,j){
+		var glyph = "<span class='glyphicon glyphicon-knight' ";
+		glyph += " data-row='"+ i + "' data-col='" + j + "'>";
+		return glyph;
+		
+	}
+
+	checkGlyph(i,j){
+		var glyph = "<span class='glyphicon glyphicon-check' ";
+		glyph += " data-row='"+ i + "' data-col='" + j + "'>";
+		return glyph;
+		
+	}
+	
+	startGame() {
+		//this.solution.push(this.path.head());
+		var i = this.path.tail().rowNum;
+		var j = this.path.tail().colNum;
+		var last = this.getDiv(i, j);
+		last.html(this.knightGlyph(i,j));
+		console.log(last);
+		//last.css("background"," #999966");	
+		this.colourCells();
+		gameDisplay.statusMessage = "";
+		gameDisplay.missteps = new Bldr("h3").att("align","center").text("missteps: 0").build();
+		gameDisplay.map = this.svgMap();
+		evnts.fireEvent("refreshStatus");
+		evnts.fireEvent("refreshSteps");
+		evnts.fireEvent("refreshMap");
+	}
+
+	colourCells(){
+		var current = this.path.tail();
+		
+		for (var i = 0; i < this.board.rowNum; i++) {
+			for (var j = 0; j < this.board.colNum; j++) {
+				var cell = this.board.cells[i][j];
+				var div = this.getDiv(i, j);
+				if (cell.isNeighbor(current) && !this.path.contains(cell)){
+					div.css("color","#004d00");
+					div.css("background","#99ff99");					
+				} else {
+					div.attr("style", "color:grey");
+				}	
+			}
+		}
+
+	}
+	
+	getCell(i, j) {
+		return this.board.cells[i][j];
+	}
+	
+	getDiv(i,j) {
+		return $("#cell" + i +""+j);
+	}
+	
+	clicked(i,j, target) {
+		var cell = this.getCell(i,j);
+		this.selectCell(cell, target);
+	}
+	
+	selectCell(cell, target) {
+		
+		var i = parseInt(target.getAttribute("data-row"));
+		var j = parseInt(target.getAttribute("data-col"));
+		var targetCell = this.board.cells[i][j];
+		var parentTarget = target;
+		if (target.localName === 'span') {
+			parentTarget = target.parentNode;
+		}	
+		if (this.path.contains(targetCell)) {
+			console.log("selected cell is in path");
+			return;
+		}
+		var currentCell = this.path.tail();
+		var currentDiv = this.getDiv(currentCell.rowNum,currentCell.colNum);
+		
+		if (!currentCell.isNeighbor(targetCell)){
+			console.log("selected cell is not a neighbor");
+			return;
+		}
+		this.path.add(targetCell);
+		
+		parentTarget.innerHTML = this.knightGlyph(i,j);
+		currentDiv.html(this.checkGlyph(i,j));
+		//currentDiv.css("color","black");
+		//this.decorateCells();
+		this.colourCells();
+		gameDisplay.map = this.svgMap();
+		evnts.fireEvent("refreshMap");
+	
+		/*
+
+		if (targetCell.isEqual(cell)){
+			this.solution.push(cell);
+			cell.showIt();
+			parentTarget.innerHTML = cell.getDisplay();
+			this.resetWrongs();
+			this.updatePath();
+			this.colourSolution();
+			gameDisplay.map = this.svgMap();
+			if (this.getIsDone()){
+				gameDisplay.statusMessage = new Bldr("h2").att("align","center").text("Finished!").build();
+				evnts.fireEvent("refreshStatus");
+			}
+			evnts.fireEvent("refreshMap");
+		} else {
+			if (cell.hide && !this.isInWrong(cell)) {
+				this.misstep ++;
+				gameDisplay.missteps = new Bldr("h3").att("align","center").text("missteps: " + this.misstep).build();
+				evnts.fireEvent("refreshSteps");
+				var glyph = "<span class='glyphicon glyphicon-remove-circle' ";
+				glyph += " data-row='"+ i + "' data-col='" + j + "'>";
+				parentTarget.innerHTML= glyph;
+				this.wrong.push(parentTarget);
+			}
+		}
+		*/
+	}
+	
+	getMissteps(){
+		return this.missteps;	
+	}
+	
+	getIsDone() {
+		return this.solution.length == this.path.cells.length;
+	}
+	
+	isInWrong(cell) {
+		var ci = cell.rowNum;
+		var cj = cell.colNum;
+		for (var k = 0; k < this.wrong.length; k++) {
+			var i = parseInt(this.wrong[k].getAttribute("data-row"));
+			var j = parseInt(this.wrong[k].getAttribute("data-col"));
+			if (ci === i && cj === j) return true;
+		}		
+		return false;
+	}
+
+	updatePath() {
+		var sIndex = this.solution.length;
+		for (var i = sIndex; i < this.path.cells.length; i++) {
+				var nextCell = this.path.cells[i];
+				if (!nextCell.hide) {
+					this.solution.push(nextCell);
+				} else {
+					break;
+				}
+		}
+	}
+	colourSolution() {
+			for (var i = 0; i < this.solution.length; i ++){
+				var div = this.getDiv(this.solution[i].rowNum, this.solution[i].colNum);
+				div.css("background","#e0e0d1");
+			}
+			var lastIndex = this.solution.length -1;
+			if (lastIndex >= 0) {
+				var last = this.getDiv(this.solution[lastIndex].rowNum, this.solution[lastIndex].colNum);
+				last.css("background"," #999966");
+			}
+	}
+	
+	resetWrongs() {
+		for (var k = 0; k < this.wrong.length; k++){
+			var div = this.wrong[k];
+			var i = parseInt(div.getAttribute("data-row"));
+			var j = parseInt(div.getAttribute("data-col"));
+			var glyph = "<span class='glyphicon glyphicon-question-sign' ";
+			glyph += " data-row='"+ i + "' data-col='" + j + "'>";
+			div.innerHTML = glyph;
+		}
+		this.wrong = [];	
+	}
+	//maybe make the map size configurable
+	// also, make it additive, instead of redrawing each time
+	svgMap() {
+		var svg = new Bldr("svg");
+		svg.att("align", "center").att("width","240").att("height","240");
+		//first the board
+		for (var i = 0; i < 8; i++) {
+			for (var j = 0; j < 8; j ++) {
+				var x = i*30;
+				var y = j*30;
+				if (i%2==0 && j%2==0){
+					var rect = new Bldr("rect").att("x", x).att("y",y);
+					rect.att("width", "30").att("height","30").att("fill", "#ccccb3"); 			
+					svg.elem(rect);
+					}
+				if (i%2!=0 && j%2!=0){
+					var rect = new Bldr("rect").att("x", x).att("y",y);
+					rect.att("width", "30").att("height","30").att("fill", "#ccccb3"); 			
+					svg.elem(rect);
+				}
+			}
+		}
+		//now the path
+		var prev = null;
+		for (var i=0; i< this.path.cells.length; i++) {
+			var cell = this.path.cells[i];
+			var x = (15 + cell.colNum*30);
+			var y = (15 + cell.rowNum*30);
+			if (prev !== null) {
+				var px = (15 + prev.colNum*30);
+				var py = (15 + prev.rowNum*30);
+				var line = new Bldr("line").att("x1", px).att("y1", py).att("x2", x).att("y2",y);
+				line.att("stroke", "black").att("stroke-width", 2);
+				svg.elem(line);
+			}
+			prev = cell;
+		}
+		//finally, the dots
+		for (var i=0; i< this.path.cells.length; i++) {
+			var cell = this.path.cells[i];
+			var x = (15 + cell.colNum*30);
+			var y = (15 + cell.rowNum*30);
+			var circle = new Bldr("circle").att("cx",x).att("cy", y);
+			circle.att("r",3).att("stroke", "black").att("stroke-width",1).att("fill","grey");
+			svg.elem(circle);
+			if (i === 0){
+				var c0 = new Bldr("circle").att("cx",x).att("cy", y);
+				c0.att("r",6).att("stroke", "black").att("stroke-width",1).att("fill","none");
+				svg.elem(c0);	
+			} else if (i === this.path.cells.length - 1) {
+				var cn = new Bldr("circle").att("cx",x).att("cy", y);
+				cn.att("r",5).att("stroke", "black").att("stroke-width",1).att("fill","black");
+				svg.elem(cn);
+			}			
+		}
+		return svg.build();
+	}
+};
+
+
+
+
+
+
 //the game instance
 var gameBoard = new Board(8,8);
 gameBoard.init();
