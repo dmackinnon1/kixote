@@ -267,7 +267,6 @@ class Path {
 		while (!this.isTour() && tries < 10) {
 			this.clear();
 			if(tries > 0) {
-				console.log("debug: retrying tour generation: " + tries + " " + this);
 			}
 			this.warnsdorffPath();
 			tries ++;
@@ -377,6 +376,7 @@ var gameDisplay = {};
 gameDisplay.statusMessage = "";
 gameDisplay.map = "";
 gameDisplay.missteps = "";
+gameDisplay.backtracks = "";
 
 /**
 * Some events are fired when these elements are updated
@@ -608,8 +608,8 @@ class Tourist {
 		board.init();
 		this.path = new Path(this.board, this.board.randomStart());
 		//this.solution = [];
-		//this.wrong = [];
-		//this.misstep = 0;
+		this.wrong = [];
+		this.backtracks = 0;
 		this.isKixote = isKixote;
 	}
 
@@ -655,9 +655,15 @@ class Tourist {
 	checkGlyph(i,j){
 		var glyph = "<span class='glyphicon glyphicon-check' ";
 		glyph += " data-row='"+ i + "' data-col='" + j + "'>";
-		return glyph;
-		
+		return glyph;		
 	}
+
+	exGlyph(i,j){
+		var glyph = "<span class='glyphicon glyphicon-remove-circle' ";
+		glyph += " data-row='"+ i + "' data-col='" + j + "'>";
+		return glyph;		
+	}
+
 	
 	startGame() {
 		//this.solution.push(this.path.head());
@@ -665,11 +671,10 @@ class Tourist {
 		var j = this.path.tail().colNum;
 		var last = this.getDiv(i, j);
 		last.html(this.knightGlyph(i,j));
-		console.log(last);
 		//last.css("background"," #999966");	
 		this.colourCells();
 		gameDisplay.statusMessage = "";
-		gameDisplay.missteps = new Bldr("h3").att("align","center").text("missteps: 0").build();
+		gameDisplay.backtracks = new Bldr("h3").att("align","center").text("backtracks: " + 0).build();
 		gameDisplay.map = this.svgMap();
 		evnts.fireEvent("refreshStatus");
 		evnts.fireEvent("refreshSteps");
@@ -677,8 +682,7 @@ class Tourist {
 	}
 
 	colourCells(){
-		var current = this.path.tail();
-		
+		var current = this.path.tail();	
 		for (var i = 0; i < this.board.rowNum; i++) {
 			for (var j = 0; j < this.board.colNum; j++) {
 				var cell = this.board.cells[i][j];
@@ -707,6 +711,33 @@ class Tourist {
 		this.selectCell(cell, target);
 	}
 	
+	backtrack() {
+		this.resetWrongs();
+		if (this.path.cells.length <2) {
+			console.log("no further backtracking allowed");
+			return;
+		}
+		var last = this.path.cells.pop();
+		var lastDiv = this.getDiv(last.rowNum,last.colNum);
+		lastDiv.html(last.decoration);	
+	
+		var current = this.path.tail();
+		var currentDiv = this.getDiv(current.rowNum,current.colNum);
+		currentDiv.html(this.knightGlyph());
+		this.backtracks ++;	
+		
+		this.colourCells();
+		gameDisplay.map = this.svgMap();
+		evnts.fireEvent("refreshMap");
+
+		gameDisplay.statusMessage = ""; 
+		evnts.fireEvent("refreshStatus");
+
+		gameDisplay.backtracks = new Bldr("h3").att("align","center").text("backtracks: " + this.backtracks).build();
+		evnts.fireEvent("refreshSteps");
+				
+	}
+
 	selectCell(cell, target) {
 		
 		var i = parseInt(target.getAttribute("data-row"));
@@ -717,17 +748,19 @@ class Tourist {
 			parentTarget = target.parentNode;
 		}	
 		if (this.path.contains(targetCell)) {
-			console.log("selected cell is in path");
 			return;
 		}
 		var currentCell = this.path.tail();
 		var currentDiv = this.getDiv(currentCell.rowNum,currentCell.colNum);
 		
 		if (!currentCell.isNeighbor(targetCell)){
-			console.log("selected cell is not a neighbor");
+			parentTarget.innerHTML= this.exGlyph(i,j);
+			this.wrong.push(parentTarget);		
 			return;
 		}
+		
 		this.path.add(targetCell);
+		this.resetWrongs();
 		
 		parentTarget.innerHTML = this.knightGlyph(i,j);
 		currentDiv.html(this.checkGlyph(i,j));
@@ -737,33 +770,16 @@ class Tourist {
 		gameDisplay.map = this.svgMap();
 		evnts.fireEvent("refreshMap");
 	
-		/*
-
-		if (targetCell.isEqual(cell)){
-			this.solution.push(cell);
-			cell.showIt();
-			parentTarget.innerHTML = cell.getDisplay();
-			this.resetWrongs();
-			this.updatePath();
-			this.colourSolution();
-			gameDisplay.map = this.svgMap();
-			if (this.getIsDone()){
+		if (this.getIsDone()){
 				gameDisplay.statusMessage = new Bldr("h2").att("align","center").text("Finished!").build();
 				evnts.fireEvent("refreshStatus");
-			}
-			evnts.fireEvent("refreshMap");
-		} else {
-			if (cell.hide && !this.isInWrong(cell)) {
-				this.misstep ++;
-				gameDisplay.missteps = new Bldr("h3").att("align","center").text("missteps: " + this.misstep).build();
-				evnts.fireEvent("refreshSteps");
-				var glyph = "<span class='glyphicon glyphicon-remove-circle' ";
-				glyph += " data-row='"+ i + "' data-col='" + j + "'>";
-				parentTarget.innerHTML= glyph;
-				this.wrong.push(parentTarget);
-			}
 		}
-		*/
+
+		if (this.path.freeDegree(targetCell) == 0) {
+				gameDisplay.statusMessage = new Bldr("h2").att("align","center").text("Blocked!").build();
+				evnts.fireEvent("refreshStatus");
+		}
+	
 	}
 	
 	getMissteps(){
@@ -771,7 +787,7 @@ class Tourist {
 	}
 	
 	getIsDone() {
-		return this.solution.length == this.path.cells.length;
+		return this.path.cells.length === 8*8;
 	}
 	
 	isInWrong(cell) {
@@ -813,9 +829,7 @@ class Tourist {
 			var div = this.wrong[k];
 			var i = parseInt(div.getAttribute("data-row"));
 			var j = parseInt(div.getAttribute("data-col"));
-			var glyph = "<span class='glyphicon glyphicon-question-sign' ";
-			glyph += " data-row='"+ i + "' data-col='" + j + "'>";
-			div.innerHTML = glyph;
+			div.innerHTML = this.getCell(i,j).decoration;
 		}
 		this.wrong = [];	
 	}

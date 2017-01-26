@@ -26,6 +26,11 @@ td {
 	width: 35px;	
 }
 
+.backtrackDisplay {
+	display: block;
+	text-align: center;	
+}
+
 </style>
 </head>
 <script src="js/evnts.js"></script> <!-- required for callback registration-->
@@ -50,6 +55,14 @@ $(document).ready(function(){
 		$("#boardDisplay").html(loadBoard());
 		game.startGame();
 	});	
+
+    $("#backtrack").on("click", function(event){
+		console.log("backtrack button clicked");
+		//$("#boardDisplay").html(loadBoard());
+		game.backtrack();
+	});	
+
+
 });
 
 /*
@@ -70,7 +83,7 @@ $(document).ready(function(){
 
 
     evnts.addCallback("refreshSteps", function() {
-		$("#missteps").html(gameDisplay.missteps);
+		$("#missteps").html(gameDisplay.backtracks);
     });
     //after callbacks are registered, we start the game
 
@@ -112,28 +125,35 @@ About </button>
 <br><hr>
 <div class="media">
   <a class="media-left media-middle" href="#">
-    <img class="media-object" src="imgs/knight_moves.jpg" alt="Knight Moves" width="150" height="150">
+    <img class="media-object" src="imgs/picasso_don_quixote.jpg" alt="Knight Moves" width="150" height="150">
   </a>
   <div class="media-body">
     <h4 class="media-heading">KnightTourist</h4>
 When a knight has traveled around a chessboard touching every square exactly once, it has complted a "knight's tour."
-A knight's tour has been completed on the 8x8 board below, and the numbers show the order in which the tour was completed.
-Some of the numbers have been hidden. Your task is to reveal the hidden numbers in the correct order to complete the tour.
- </div>
+Your task is to complete a knight's tour on the board below. Green squares indicate a legal move, and the numbers on each 
+square tell you how many open moves are available from that square. The "Warnsdorff" heuristic for finding a tour is to 
+always move to a square with the lowest number of available moves.
+</div>
 </div>
 <br>
 <hr><br>
 </div>
 
-<button id="refresh" class="btn btn-default">New Puzzle</button>
+<button id="refresh" class="btn btn-default">Restart</button>
 <div id="finish" style="text-align=center"></div>
 <hr>
 <h3><div id="boardDisplay" style="text-align=center">
 </div>
 </h3>
 <hr>
+
+<div class="backtrackDisplay">
+<button id="backtrack" style="text-align=center" class="btn btn-default">Backtrack</button>
 <div id="missteps" style="text-align=center"></div>
+</div>
+
 <hr>
+
 <div id="mapDisplay" style="text-align=center"></div>
 <hr>
 
