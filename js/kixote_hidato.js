@@ -1,5 +1,4 @@
-var gameType ={};
-gameType.type = "kixote";
+
 gameType.isKixote = function() {
 	return gameType.type === "kixote";
 }

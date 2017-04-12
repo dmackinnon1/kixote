@@ -1,4 +1,15 @@
+var gameType ={};
+gameType.type = "kixote";
 
+gameType.isKixote = function() {
+	return gameType.type === "kixote";
+}
+gameType.isNumbrix = function() {
+	return gameType.type === "numbrix";
+}
+gameType.isHidato = function() {
+	return gameType.type === "hidato";
+}
 //Classes for generating knight tours, and kings tours
 /*
 * A Cell is a square on the chessboard.
