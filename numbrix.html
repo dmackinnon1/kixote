@@ -30,16 +30,19 @@ svg {
 <script src="js/bldrs.js"></script> <!-- required for html/svg building -->
 <script src="js/kixote_base.js"></script>
 <script src="js/kixote_hidato.js"></script>
+<script src="js/solver.js"></script>
 <script>
 
 function loadBoard() {
 	gameType.type = "numbrix"; 
-	gameType.difficulty = 2;
+	gameType.hideStrategy = strategyC;
 	game= new Game(gameBoard);
 	game.init();
 	if (game.isIncomplete()) {
 		console.log("debug: " + game);
 	}
+	var fixer = new Fixer(game);
+	fixer.fix();
 	return htmlForBoard(game.getBoard());
 };
 
