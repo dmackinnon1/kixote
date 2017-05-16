@@ -22,4 +22,12 @@ The mechanics of generating puzzles is the same for all types.
 5. If more than one solution to the puzzle is found, reveal one of the hidden squares that occured at a 'branch point' of the different solution paths. Repeat step 4.
 6. When a single solution remains for the puzzle, display the puzzle to the user.
 
-See [dmackinnon1.github.io/kixote/](http://dmackinnon1.github.io/kixote/) for links to a live example.
+I started looking at puzzles like this a few years back. Some background on these can be found on these blog posts:
+* [Hidato or a King's Tour](http://www.mathrecreation.com/2011/06/hidato-or-kings-tour.html)
+* [Kixote or Knight's Path Puzzles](http://www.mathrecreation.com/2011/06/kixote-or-knights-path-puzzles.html)
+
+For even more background, see these posts:
+* [Life Lessons from a Knight's Tour](http://www.mathrecreation.com/2016/12/life-lessons-from-knights-tour.html)
+* [Build Your Own Knight's Tour](http://www.mathrecreation.com/2017/01/build-your-own-knights-tour.html)
+
+See [dmackinnon1.github.io/kixote/](http://dmackinnon1.github.io/kixote/) for links to a live example of the various puzzle types.
