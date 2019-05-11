@@ -45,7 +45,7 @@ td {
 <script>
 
 function loadBoard() {
-	game= new Tourist();
+	game= new Tourist(8);
 	game.init();
 	return htmlForBoard(game.getBoard());
 };
