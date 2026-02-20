@@ -266,6 +266,17 @@ class Cell {
 		}
 		return parseInt(this.decoration) === l;
 	}
+
+	isMaxNeighborOffPath(cell, path) {
+		if (! this.isNeighbor(cell)) return false;
+		let l = -1; 
+		let n = cell.neighbors().filter(x => !path.contains(x));
+		for (let c in n){
+			let t = parseInt(n[c].decoration);
+			if (t >= l) l = t;
+		}
+		return parseInt(this.decoration) === l;
+	}
 	
 	degree(){
 		return this.neighbors().length;
