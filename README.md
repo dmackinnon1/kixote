@@ -26,5 +26,3 @@ The mechanics of generating puzzles is the same for all types.
 6. When a single solution remains for the puzzle, display the puzzle to the user.
 
 A strategy for winning at **joust** is to follow the _opposite_ of the Warnsdorff heuristic and always claim the spaces that provide the most number of moves available from them.
-
-See [dmackinnon1.github.io/kixote/](http://dmackinnon1.github.io/kixote/) for links to a live example of the various puzzle types.
